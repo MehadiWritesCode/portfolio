@@ -68,7 +68,7 @@ export default function Contact() {
 
     if (res.ok) {
     setStatus("done");
-    setName("");      
+    setName("");
     setEmail("");
     setMessage("");
   } else {
@@ -204,15 +204,15 @@ export default function Contact() {
                 <Send size={14} />
               </button>
               {status === "done" && (
-                <p className="text-green-600 text-sm text-center">
-                  ✅ Message sent! I`ll reply soon.
-                </p>
-              )}
-              {status === "error" && (
-                <p className="text-red-500 text-sm text-center">
-                  ❌ Something went wrong. Try again.
-                </p>
-              )}
+  <p className="text-black text-sm text-center border border-black/10 rounded-xl py-3">
+    ✓ Message sent! I`ll reply soon.
+  </p>
+)}
+{status === "error" && (
+  <p className="text-black text-sm text-center border border-black/10 rounded-xl py-3">
+    ✗ Something went wrong. Try again.
+  </p>
+)}
             </div>
           </div>
         </div>
