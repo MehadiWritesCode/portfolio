@@ -59,25 +59,6 @@ function getTagColor(tag: string) {
 const projects = [
   {
     num: "01",
-    title: "NetSpy",
-    description:
-      "Advance Packet capturing and security analysis and traffic monitoring.",
-    tags: [
-      "Python",
-      "Scapy",
-      "Customtkinter",
-      "packet-sniffer",
-      "traffic-monitor",
-      "cyber-security",
-      "networking",
-    ],
-    github: "https://github.com/MehadiWritesCode/NetSpy",
-    live: "",
-    featured: true,
-    inProgress: false,
-  },
-  {
-    num: "02",
     title: "NIXBIRD",
     description: "Premium Clothing brand.",
     tags: [
@@ -97,8 +78,28 @@ const projects = [
     github: "https://github.com/MehadiWritesCode/nixbird",
     live: "https://nixbird.com",
     featured: true,
-    inProgress: true,
+    inProgress: false,
   },
+  {
+    num: "02",
+    title: "NetSpy",
+    description:
+      "Advance Packet capturing and security analysis and traffic monitoring.",
+    tags: [
+      "Python",
+      "Scapy",
+      "Customtkinter",
+      "packet-sniffer",
+      "traffic-monitor",
+      "cyber-security",
+      "networking",
+    ],
+    github: "https://github.com/MehadiWritesCode/NetSpy",
+    live: "",
+    featured: true,
+    inProgress: false,
+  },
+
   {
     num: "03",
     title: "Robot PathFinder",
@@ -165,8 +166,7 @@ const projects = [
   {
     num: "06",
     title: "World Explore",
-    description:
-      "Give primary details of every country in the world",
+    description: "Give primary details of every country in the world",
     tags: ["HTML", "css", "js", "API"],
     github: "https://github.com/MehadiWritesCode/world-explore",
     live: "https://world-explore6838.netlify.app",
