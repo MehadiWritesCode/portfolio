@@ -1,50 +1,62 @@
 "use client";
 
-import { Code2, Palette, Coffee, Gamepad2, Music, BookOpen } from "lucide-react";
+import {
+  Code2,
+  Palette,
+  Coffee,
+  Gamepad2,
+  Music,
+  BookOpen,
+} from "lucide-react";
 
 const hobbies = [
-  { icon: Code2,     label: "Open Source" },
-  { icon: Palette,   label: "UI Design" },
-  { icon: Coffee,    label: "Coffee" },
-  { icon: Gamepad2,  label: "Gaming" },
-  { icon: Music,     label: "Music" },
-  { icon: BookOpen,  label: "Reading" },
+  { icon: Code2, label: "Open Source" },
+  { icon: Palette, label: "UI Design" },
+  { icon: Coffee, label: "Coffee" },
+  { icon: Gamepad2, label: "Gaming" },
+  { icon: Music, label: "Music" },
+  { icon: BookOpen, label: "Reading" },
 ];
 
 export default function About() {
   return (
-    <section id="about" className="lg:ml-[240px] py-28 bg-white border-t border-black/[0.06]">
+    <section
+      id="about"
+      className="lg:ml-[240px] py-10 bg-white border-t border-black/[0.06]"
+    >
       <div className="max-w-5xl mx-auto px-8 lg:px-16">
-
         {/* Section label */}
         <div className="flex items-center gap-4 mb-16">
-          <span className="font-mono-custom text-[11px] text-black/30 uppercase tracking-[0.25em]">02 — About</span>
+          <span className="font-mono-custom text-[11px] text-black/30 uppercase tracking-[0.25em]">
+            02 — About
+          </span>
           <div className="flex-1 h-px bg-black/[0.07]" />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-20 items-start">
-
           {/* Left */}
           <div>
             <h2 className="font-display font-semibold text-[clamp(1.9rem,3.5vw,2.8rem)] text-black leading-[1.15] mb-8">
               A developer who{" "}
-              <span className="italic text-black/30">loves</span>{" "}
-              solving real problems.
+              <span className="italic text-black/30">loves</span> solving real
+              problems.
             </h2>
 
             <div className="space-y-4 text-black/50 text-[1.05rem] leading-relaxed">
               <p>
-                I`m a full-stack developer based in Dhaka, Bangladesh — passionate
-                about building products that feel as good as they look.
+                I`m a full-stack developer based in Dhaka, Bangladesh —
+                passionate about building products that feel as good as they
+                look.
               </p>
               <p>
-                With a background in both design and development, I approach every
-                project holistically — thinking about UX, performance, and
+                With a background in both design and development, I approach
+                every project holistically — thinking about UX, performance, and
                 scalability all at once.
               </p>
               <p>
                 When I`m not shipping code, I`m exploring design trends,
-                contributing to open-source, or brewing the perfect cup of coffee.
+                contributing to open-source, or brewing the perfect cup of
+                coffee.
               </p>
             </div>
 
@@ -52,8 +64,12 @@ export default function About() {
             <div className="mt-9 flex items-start gap-4 p-5 border border-black/[0.08] rounded-2xl bg-black/[0.015]">
               <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 animate-pulse flex-shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-black">Studying Computer Science</p>
-                <p className="text-sm text-black/40 mt-0.5">Open to freelance & internship opportunities</p>
+                <p className="text-sm font-semibold text-black">
+                  Studying Computer Science
+                </p>
+                <p className="text-sm text-black/40 mt-0.5">
+                  Open to freelance & internship opportunities
+                </p>
               </div>
             </div>
           </div>
@@ -90,7 +106,6 @@ export default function About() {
               </p>
             </div>
           </div>
-
         </div>
       </div>
     </section>

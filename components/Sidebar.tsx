@@ -1,5 +1,7 @@
 "use client";
 
+// components/Sidebar.tsx
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -11,8 +13,17 @@ import {
   Cpu,
   Mail,
   Palette,
+  Skull,
+  Telescope,
 } from "lucide-react";
 import Image from "next/image";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  LayoutGroup,
+  type Variants,
+} from "framer-motion";
 
 const links = [
   { label: "Home", href: "#home", icon: Home },
@@ -20,6 +31,8 @@ const links = [
   { label: "Skills", href: "#skills", icon: Cpu },
   { label: "Projects", href: "#projects", icon: Briefcase },
   { label: "Hobbies", href: "#hobbies", icon: Palette },
+  { label: "My Rabbit Holes", href: "#rabbit-holes", icon: Telescope },
+  { label: "Am I Villain?", href: "#villain", icon: Skull },
   { label: "Contact", href: "#contact", icon: Mail },
 ];
 
@@ -61,13 +74,51 @@ const socials = [
   { icon: XIcon, href: "https://x.com/Mehadi_Hasan68", label: "X / Twitter" },
 ];
 
+// ─── Variants (typed properly) ────────────────────────────────────────
+const EASE_EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const mobileMenuVariants: Variants = {
+  hidden: { opacity: 0, y: -8, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.32, ease: EASE_EXPO },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    scale: 0.98,
+    transition: { duration: 0.22, ease: "easeIn" },
+  },
+};
+
+const mobileLinkVariants: Variants = {
+  hidden: { opacity: 0, x: -16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: 0.06 + i * 0.05, duration: 0.35, ease: EASE_EXPO },
+  }),
+};
+
+const socialVariants: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.1 + i * 0.07, duration: 0.4, ease: EASE_EXPO },
+  }),
+};
+
+// ─── Component ────────────────────────────────────────────────────────
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("Home");
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const sectionIds = ["home", "about", "skills", "projects", "contact"];
-
+    const sectionIds = links.map((l) => l.href.replace("#", ""));
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -79,14 +130,12 @@ export default function Sidebar() {
           }
         });
       },
-      { threshold: 0.4 },
+      { threshold: 0.35 },
     );
-
     sectionIds.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
-
     return () => observer.disconnect();
   }, []);
 
@@ -97,9 +146,13 @@ export default function Sidebar() {
     };
   }, [open]);
 
+  const springTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 380, damping: 30 };
+
   return (
     <>
-      {/* ─── DESKTOP SIDE PANEL ─── */}
+      {/* ─── DESKTOP SIDEBAR ──────────────────────────────────────────── */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-[240px] flex-col bg-white border-r border-black/[0.07] z-50">
         {/* Logo */}
         <div className="px-7 pt-9 pb-7 border-b border-black/[0.07]">
@@ -124,23 +177,32 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        {/* Nav links */}
+        {/* Nav */}
         <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
-          {links.map(({ label, href, icon: Icon }) => (
-            <Link
-              key={label}
-              href={href}
-              onClick={() => setActive(label)}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
-                active === label
-                  ? "bg-black text-white"
-                  : "text-black/80 hover:text-black hover:bg-black/[0.04]"
-              }`}
-            >
-              <Icon size={15} className="flex-shrink-0" />
-              {label}
-            </Link>
-          ))}
+          <LayoutGroup id="desktop-nav">
+            {links.map(({ label, href, icon: Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                onClick={() => setActive(label)}
+                className="relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium"
+                style={{
+                  color: active === label ? "#fff" : "rgba(0,0,0,0.75)",
+                }}
+              >
+                {active === label && (
+                  <motion.span
+                    layoutId="desktop-active-pill"
+                    className="absolute inset-0 rounded-xl bg-black"
+                    style={{ zIndex: -1 }}
+                    transition={springTransition}
+                  />
+                )}
+                <Icon size={15} className="flex-shrink-0 relative z-10" />
+                <span className="relative z-10">{label}</span>
+              </Link>
+            ))}
+          </LayoutGroup>
         </nav>
 
         {/* Bottom */}
@@ -152,23 +214,30 @@ export default function Sidebar() {
             </span>
           </div>
           <div className="flex items-center gap-2.5">
-            {socials.map(({ icon: Icon, href, label }) => (
-              <Link
+            {socials.map(({ icon: Icon, href, label }, i) => (
+              <motion.div
                 key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-black/10 text-black/35 hover:text-black hover:border-black/25 hover:bg-black/[0.03] transition-all duration-200"
+                custom={i}
+                variants={socialVariants}
+                initial="hidden"
+                animate="visible"
               >
-                <Icon size={15} />
-              </Link>
+                <Link
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-black/10 text-black/35 hover:text-black hover:border-black/25 hover:bg-black/[0.03] transition-all duration-200"
+                >
+                  <Icon size={15} />
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
       </aside>
 
-      {/* ─── MOBILE TOP BAR ─── */}
+      {/* ─── MOBILE TOP BAR ───────────────────────────────────────────── */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-black/[0.07]">
         <div className="flex items-center justify-between px-5 py-3.5">
           <Link href="#home" className="flex items-center gap-2.5 min-w-0">
@@ -185,79 +254,126 @@ export default function Sidebar() {
               Mehadi Hasan
             </span>
           </Link>
-          <button
+          <motion.button
             onClick={() => setOpen(!open)}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
             className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl border border-black/10 text-black/60 hover:text-black transition-colors ml-3"
           >
-            {open ? <X size={17} /> : <Menu size={17} />}
-          </button>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={open ? "x" : "menu"}
+                initial={{ opacity: 0, rotate: -45 }}
+                animate={{ opacity: 1, rotate: 0 }}
+                exit={{ opacity: 0, rotate: 45 }}
+                transition={{ duration: 0.15 }}
+              >
+                {open ? <X size={17} /> : <Menu size={17} />}
+              </motion.span>
+            </AnimatePresence>
+          </motion.button>
         </div>
       </div>
 
-      {/* ─── MOBILE FULLSCREEN MENU ─── */}
-      {open && (
-        <div className="lg:hidden fixed inset-0 z-[60] bg-white flex flex-col">
-          {/* Menu top bar */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-black/[0.07]">
-            <Link href="#home" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-                <span className="text-white text-xs font-bold">MH</span>
-              </div>
-              <span className="text-[13px] font-semibold text-black">
-                Mehadi Hasan
-              </span>
-            </Link>
-            <button
-              onClick={() => setOpen(false)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-black/10 text-black/60 hover:text-black transition-colors"
-            >
-              <X size={17} />
-            </button>
-          </div>
-
-          {/* Links */}
-          <nav className="flex-1 px-5 pt-6 space-y-2">
-            {links.map(({ label, href, icon: Icon }) => (
-              <Link
-                key={label}
-                href={href}
-                onClick={() => {
-                  setActive(label);
-                  setOpen(false);
-                }}
-                className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-medium text-base transition-all duration-200 ${
-                  active === label
-                    ? "bg-black text-white"
-                    : "border border-black/08 text-black hover:bg-black hover:text-white hover:border-black"
-                }`}
-              >
-                <Icon size={18} />
-                {label}
+      {/* ─── MOBILE FULLSCREEN MENU ───────────────────────────────────── */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="lg:hidden fixed inset-0 z-[60] bg-white flex flex-col"
+            variants={mobileMenuVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-black/[0.07]">
+              <Link href="#home" className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">MH</span>
+                </div>
+                <span className="text-[13px] font-semibold text-black">
+                  Mehadi Hasan
+                </span>
               </Link>
-            ))}
-          </nav>
-
-          {/* Socials */}
-          <div className="px-5 py-8 border-t border-black/[0.07]">
-            <p className="text-[11px] text-black/30 uppercase tracking-widest font-mono-custom mb-4">
-              Find me on
-            </p>
-            <div className="flex items-center gap-3">
-              {socials.map(({ icon: Icon, href, label }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 flex items-center justify-center rounded-xl border border-black/10 text-black/40 hover:text-black hover:border-black/30 transition-all"
-                >
-                  <Icon size={17} />
-                </Link>
-              ))}
+              <button
+                onClick={() => setOpen(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl border border-black/10 text-black/60 hover:text-black transition-colors"
+              >
+                <X size={17} />
+              </button>
             </div>
-          </div>
-        </div>
-      )}
+
+            {/* Links */}
+            <nav className="flex-1 px-5 pt-6 space-y-2">
+              <LayoutGroup id="mobile-nav">
+                {links.map(({ label, href, icon: Icon }, i) => (
+                  <motion.div
+                    key={label}
+                    custom={i}
+                    variants={mobileLinkVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="relative"
+                  >
+                    <Link
+                      href={href}
+                      onClick={() => {
+                        setActive(label);
+                        setOpen(false);
+                      }}
+                      className="relative flex items-center gap-4 px-5 py-4 rounded-2xl font-medium text-base overflow-hidden"
+                      style={{
+                        color: active === label ? "#fff" : "#000",
+                        border:
+                          active === label
+                            ? "none"
+                            : "1px solid rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      {active === label && (
+                        <motion.span
+                          layoutId="mobile-active-pill"
+                          className="absolute inset-0 bg-black"
+                          style={{ zIndex: -1 }}
+                          transition={springTransition}
+                        />
+                      )}
+                      <Icon size={18} className="relative z-10 flex-shrink-0" />
+                      <span className="relative z-10">{label}</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </LayoutGroup>
+            </nav>
+
+            {/* Socials */}
+            <div className="px-5 py-8 border-t border-black/[0.07]">
+              <p className="text-[11px] text-black/30 uppercase tracking-widest mb-4">
+                Find me on
+              </p>
+              <div className="flex items-center gap-3">
+                {socials.map(({ icon: Icon, href, label }, i) => (
+                  <motion.div
+                    key={label}
+                    custom={i}
+                    variants={socialVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <Link
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 flex items-center justify-center rounded-xl border border-black/10 text-black/40 hover:text-black hover:border-black/30 transition-all"
+                    >
+                      <Icon size={17} />
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

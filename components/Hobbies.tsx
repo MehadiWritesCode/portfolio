@@ -40,6 +40,23 @@ const IconGamepad = () => (
   </svg>
 );
 
+const IconBook = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path
+      d="M4 3h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M15 14H5M7 3v11"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 /* ── Data ───────────────────────────────────────────────────────────────── */
 type HobbyItem = { label: string; sub?: string };
 type HobbyBlock = {
@@ -75,6 +92,22 @@ const hobbies: HobbyBlock[] = [
       { label: "MLBB", sub: "MOBA" },
       { label: "League of Legends", sub: "MOBA" },
       { label: "Clash of Clans", sub: "Strategy" },
+    ],
+  },
+  {
+    id: "books",
+    category: "Books & Reading",
+    tag: "Reader",
+    icon: <IconBook />,
+    items: [
+      { label: "The Laws of Human Nature", sub: "Psychology" },
+      { label: "Influence", sub: "Persuasion" },
+      { label: "The 48 Laws of Power", sub: "Dark psychology" },
+      { label: "Manufacturing Consent", sub: "Media & power" },
+      { label: "The Gift of Fear", sub: "Intuition" },
+      { label: "A Brief History of Time", sub: "Science" },
+      { label: "Thinking, Fast and Slow", sub: "Cognitive sci." },
+      { label: "The Dictator's Handbook", sub: "Political sci." },
     ],
   },
 ];
@@ -158,7 +191,7 @@ export default function Hobbies() {
   return (
     <section
       id="hobbies"
-      className="lg:ml-[240px] py-28 bg-white border-t border-black/[0.06]"
+      className="lg:ml-[240px] py-10 bg-white border-t border-black/[0.06]"
     >
       <div className="max-w-5xl mx-auto px-5 sm:px-8 lg:px-16">
         {/* Label */}
@@ -172,19 +205,24 @@ export default function Hobbies() {
         {/* Heading */}
         <div className="mb-12">
           <h2 className="font-semibold text-[clamp(1.9rem,3.5vw,2.8rem)] text-black leading-[1.15]">
-            When I`m not coding
+            When I&apos;m not coding
           </h2>
           <p className="text-black/60 mt-2 text-base max-w-lg">
-            A developer is more than their stack — here`s what keeps me
+            A developer is more than their stack — here&apos;s what keeps me
             entertained and sharp outside the editor.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          {hobbies.map((block, i) => (
-            <HobbyCard key={block.id} block={block} delay={i * 100} />
-          ))}
+        {/* Cards — first two side by side, books full width below */}
+        <div className="flex flex-col gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            {hobbies.slice(0, 2).map((block, i) => (
+              <HobbyCard key={block.id} block={block} delay={i * 100} />
+            ))}
+          </div>
+
+          {/* Books card spans full width */}
+          <HobbyCard key={hobbies[2].id} block={hobbies[2]} delay={200} />
         </div>
 
         {/* Bottom quote strip */}
@@ -199,9 +237,10 @@ export default function Hobbies() {
             </svg>
           </div>
           <p className="text-[13px] text-black/65 leading-relaxed">
-            Competitive gaming sharpens my decision-making under pressure, and
-            dark cinema keeps my creative instincts alive — both feed back into
-            better, more thoughtful software.
+            Competitive gaming sharpens my decision-making under pressure, dark
+            cinema keeps my creative instincts alive, and books on psychology
+            and power deepen how I understand people and systems — all of it
+            feeds back into better, more thoughtful software.
           </p>
         </div>
       </div>

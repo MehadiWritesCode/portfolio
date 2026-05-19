@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Star } from "lucide-react";
 
 function GithubIcon({ size = 16 }: { size?: number }) {
   return (
@@ -12,7 +12,7 @@ function GithubIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-type Tab = "favs" | "saas" | "all";
+type Tab = "favs" | "saas" | "others";
 
 const ACCENT_COLORS = [
   "#6366f1",
@@ -33,42 +33,42 @@ function getTagColor(tag: string) {
       t.includes(k),
     )
   )
-    return "bg-yellow-50 border-yellow-200 text-yellow-800";
+    return "bg-yellow-50 border-yellow-200 text-yellow-900";
   if (
     ["react", "nextjs", "next.js", "html", "css", "tailwind", "framer"].some(
       (k) => t.includes(k),
     )
   )
-    return "bg-blue-50 border-blue-200 text-blue-700";
+    return "bg-blue-50 border-blue-200 text-blue-800";
   if (
     ["supabase", "postgresql", "mongodb", "mysql", "redis"].some((k) =>
       t.includes(k),
     )
   )
-    return "bg-green-50 border-green-200 text-green-700";
+    return "bg-green-50 border-green-200 text-green-800";
   if (
     ["vercel", "netlify", "render", "cloudflare", "docker"].some((k) =>
       t.includes(k),
     )
   )
-    return "bg-purple-50 border-purple-200 text-purple-700";
+    return "bg-purple-50 border-purple-200 text-purple-800";
   if (
     ["oauth", "jwt", "auth", "bcrypt", "security", "cyber"].some((k) =>
       t.includes(k),
     )
   )
-    return "bg-red-50 border-red-200 text-red-700";
+    return "bg-red-50 border-red-200 text-red-800";
   if (
     ["api", "rest", "graphql", "expressjs", "node"].some((k) => t.includes(k))
   )
-    return "bg-orange-50 border-orange-200 text-orange-700";
+    return "bg-orange-50 border-orange-200 text-orange-800";
   if (
     ["cloudinary", "resend", "stripe", "gemini", "openai"].some((k) =>
       t.includes(k),
     )
   )
-    return "bg-pink-50 border-pink-200 text-pink-700";
-  return "bg-slate-50 border-slate-200 text-slate-500";
+    return "bg-pink-50 border-pink-200 text-pink-800";
+  return "bg-slate-50 border-slate-200 text-slate-600";
 }
 
 type Project = {
@@ -81,6 +81,7 @@ type Project = {
   featured: boolean;
   inProgress: boolean;
   cats: Tab[];
+  stars?: number; // only for "others" tab, 1–5
 };
 
 const projects: Project[] = [
@@ -93,12 +94,10 @@ const projects: Project[] = [
       "Tailwind",
       "typescript",
       "supabase",
-      "supabase-Oauth",
+      "Oauth",
       "cloudinary",
       "resend",
       "trunstile",
-      "cloudflare",
-      "google-Oauth",
       "postgresql",
       "vercel",
     ],
@@ -138,7 +137,7 @@ const projects: Project[] = [
     live: "",
     featured: true,
     inProgress: false,
-    cats: [],
+    cats: ["favs"],
   },
   {
     num: "04",
@@ -202,7 +201,8 @@ const projects: Project[] = [
     live: "https://world-explore6838.netlify.app",
     featured: false,
     inProgress: false,
-    cats: [],
+    cats: ["others"],
+    stars: 3,
   },
   {
     num: "07",
@@ -214,7 +214,8 @@ const projects: Project[] = [
     live: "",
     featured: false,
     inProgress: false,
-    cats: [],
+    cats: ["others"],
+    stars: 4,
   },
   {
     num: "08",
@@ -226,7 +227,8 @@ const projects: Project[] = [
     live: "https://nibir-hasan.netlify.app",
     featured: false,
     inProgress: false,
-    cats: [],
+    cats: ["others"],
+    stars: 3,
   },
   {
     num: "09",
@@ -238,28 +240,52 @@ const projects: Project[] = [
     live: "",
     featured: false,
     inProgress: false,
-    cats: [],
+    cats: ["others"],
+    stars: 4,
   },
 ];
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "favs", label: "⭐ Favourites" },
+  { key: "favs", label: "⭐ My Favs" },
   { key: "saas", label: "SaaS" },
-  { key: "all", label: "All Projects" },
+  { key: "others", label: "Others" },
 ];
+
+function StarRating({ count }: { count: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star
+          key={i}
+          size={11}
+          className={
+            i < count
+              ? "fill-amber-400 text-amber-400"
+              : "fill-black/[0.06] text-black/[0.06]"
+          }
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function Projects() {
   const [activeTab, setActiveTab] = useState<Tab>("favs");
 
-  const filtered =
-    activeTab === "all"
-      ? projects
-      : projects.filter((p) => p.cats.includes(activeTab));
+  const filtered = projects
+    .filter((p) => p.cats.includes(activeTab))
+    .sort((a, b) => {
+      // In "others" tab, sort by stars descending
+      if (activeTab === "others") {
+        return (b.stars ?? 0) - (a.stars ?? 0);
+      }
+      return 0;
+    });
 
   return (
     <section
       id="projects"
-      className="lg:ml-[240px] py-28 bg-white border-t border-black/[0.06]"
+      className="lg:ml-[240px] py-10 bg-white border-t border-black/[0.06]"
     >
       <div className="max-w-5xl mx-auto px-8 lg:px-16">
         {/* Label */}
@@ -271,9 +297,15 @@ export default function Projects() {
         </div>
 
         <div className="flex items-end justify-between mb-10">
-          <h2 className="font-display font-semibold text-[clamp(1.9rem,3.5vw,2.8rem)] text-black leading-[1.15]">
-            Things I&apos;ve built
-          </h2>
+          <div>
+            <h2 className="font-display font-semibold text-[clamp(1.9rem,3.5vw,2.8rem)] text-black leading-[1.15]">
+              Small but mine.
+            </h2>
+            <p className="text-black/35 mt-2 text-[13px] leading-relaxed max-w-sm">
+              Not a lot — but every line is something I actually cared about
+              building.
+            </p>
+          </div>
           <Link
             href="https://github.com/MehadiWritesCode"
             target="_blank"
@@ -324,16 +356,22 @@ export default function Projects() {
 
                 {/* Top row */}
                 <div className="flex items-center justify-between mb-6">
-                  <span className="font-mono-custom text-[11px] text-black/20 uppercase tracking-[0.2em]">
-                    {p.num}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono-custom text-[11px] text-black/20 uppercase tracking-[0.2em]">
+                      {p.num}
+                    </span>
+                    {/* Star rating — only shown in "others" tab */}
+                    {activeTab === "others" && p.stars !== undefined && (
+                      <StarRating count={p.stars} />
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     {p.inProgress && (
                       <span className="text-[11px] font-medium text-amber-600 border border-amber-200 bg-amber-50 px-2.5 py-0.5 rounded-full">
                         In Progress
                       </span>
                     )}
-                    {p.featured && !p.inProgress && (
+                    {p.featured && !p.inProgress && activeTab !== "others" && (
                       <span className="text-[11px] font-medium text-white border border-black/10 px-2.5 py-0.5 rounded-full bg-black">
                         Featured
                       </span>

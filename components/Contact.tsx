@@ -78,7 +78,7 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="lg:ml-[240px] py-28 bg-white border-t border-black/[0.06]"
+      className="lg:ml-[240px] py-10 bg-white border-t border-black/[0.06]"
     >
       <div className="max-w-5xl mx-auto px-8 lg:px-16">
         {/* Section label */}

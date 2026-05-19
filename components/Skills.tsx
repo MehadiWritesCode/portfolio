@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useInView,
+  type Variants,
+} from "framer-motion";
 
 const sections = [
   "Frontend",
@@ -50,6 +56,54 @@ const badges = [
   "REST API",
 ];
 
+/* ─── Framer Motion Variants ─────────────────────────────────────────────── */
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.05,
+    },
+  },
+  exit: {
+    transition: {
+      staggerChildren: 0.04,
+      staggerDirection: -1,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    transition: { duration: 0.22, ease: "easeIn" },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.88, y: 10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.92,
+    transition: { duration: 0.18, ease: "easeIn" },
+  },
+};
+
+/* ─── Lang Icons ─────────────────────────────────────────────────────────── */
 const LangIcon = ({ lang }: { lang: string }) => {
   const icons: Record<string, React.ReactNode> = {
     C: (
@@ -278,31 +332,14 @@ const languages = [
 ];
 
 /* ─── Skill Bar ─────────────────────────────────────────────────────────── */
-function SkillBar({
-  name,
-  level,
-  delay = 0,
-}: {
-  name: string;
-  level: number;
-  delay?: number;
-}) {
-  const [animated, setAnimated] = useState(false);
+function SkillBar({ name, level }: { name: string; level: number }) {
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setAnimated(true);
-      },
-      { threshold: 0.2 },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
+  // useInView triggers the bar fill when it enters viewport
+  const inView = useInView(ref, { once: false, margin: "0px 0px -40px 0px" });
 
   return (
-    <div ref={ref} className="group">
+    // motion.div handles fade+slide via parent stagger
+    <motion.div ref={ref} variants={itemVariants} className="group">
       <div className="flex justify-between mb-1.5">
         <span className="text-[13px] font-medium text-black/70 group-hover:text-black transition-colors duration-200">
           {name}
@@ -315,15 +352,18 @@ function SkillBar({
         </span>
       </div>
       <div className="h-[3px] bg-black/[0.06] rounded-full overflow-hidden">
-        <div
-          className="h-full bg-black rounded-full transition-all duration-700 ease-out"
-          style={{
-            width: animated ? `${level}%` : "0%",
-            transitionDelay: `${delay}ms`,
+        <motion.div
+          className="h-full bg-black rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: inView ? `${level}%` : 0 }}
+          transition={{
+            duration: 0.65,
+            ease: [0.25, 0.46, 0.45, 0.94],
+            delay: 0.1,
           }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -332,7 +372,6 @@ export default function Skills() {
   const [active, setActive] = useState<Section>("Frontend");
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Scroll active tab into view on mobile
   const handleNav = (sec: Section) => {
     setActive(sec);
     const btn = navRef.current?.querySelector(
@@ -349,34 +388,39 @@ export default function Skills() {
 
   return (
     <>
-      {/* Marquee keyframe + nav scroll hide */}
       <style>{`
         @keyframes marquee {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        .animate-marquee { animation: marquee 22s linear infinite; }
+        .animate-marquee {
+          animation: marquee 22s linear infinite;
+          will-change: transform;
+        }
         .skills-nav::-webkit-scrollbar { display: none; }
         .skills-nav { -ms-overflow-style: none; scrollbar-width: none; }
+
         .tab-btn { position: relative; }
         .tab-btn::after {
           content: "";
           position: absolute;
-          bottom: -1px;
-          left: 0; right: 0;
+          bottom: 0; left: 0; right: 0;
           height: 2px;
           background: black;
           transform: scaleX(0);
           transition: transform 0.2s ease;
-          border-radius: 2px;
+          border-radius: 2px 2px 0 0;
         }
         .tab-btn.active::after,
         .tab-btn:hover::after { transform: scaleX(1); }
+
+        .skills-content-area { min-height: 320px; }
+        .skills-section-wrap { overflow-anchor: none; }
       `}</style>
 
       <section
         id="skills"
-        className="lg:ml-[240px] py-28 bg-white border-t border-black/[0.06]"
+        className="skills-section-wrap lg:ml-[240px] py-10 bg-white border-t border-black/[0.06]"
       >
         <div className="max-w-5xl mx-auto px-5 sm:px-8 lg:px-16">
           {/* Label */}
@@ -397,8 +441,11 @@ export default function Skills() {
             </p>
           </div>
 
-          {/* ── Sticky Nav ───────────────────────────────────────────────── */}
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-sm border-b border-black/[0.07] mb-10 -mx-5 sm:-mx-8 lg:-mx-16 px-5 sm:px-8 lg:px-16">
+          {/* Sticky Nav */}
+          <div
+            className="sticky top-0 z-20 bg-white/90 backdrop-blur-sm border-b border-black/[0.07] mb-10 -mx-5 sm:-mx-8 lg:-mx-16 px-5 sm:px-8 lg:px-16 overflow-hidden"
+            style={{ transform: "translateZ(0)", willChange: "transform" }}
+          >
             <nav
               ref={navRef}
               className="skills-nav flex overflow-x-auto gap-0"
@@ -421,41 +468,69 @@ export default function Skills() {
             </nav>
           </div>
 
-          {/* ── Content Panel ─────────────────────────────────────────────── */}
-
-          {/* Skill bars (Frontend / Backend / Database / Tools) */}
-          {active !== "Languages" && (
-            <div className="grid sm:grid-cols-2 gap-x-12 gap-y-5 mb-14">
-              {skillList.map((skill, i) => (
-                <SkillBar
-                  key={`${active}-${skill.name}`}
-                  name={skill.name}
-                  level={skill.level}
-                  delay={i * 60}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Languages grid */}
-          {active === "Languages" && (
-            <div className="grid grid-cols-4 xs:grid-cols-4 sm:grid-cols-7 gap-3 mb-14">
-              {languages.map((lang) => (
-                <div
-                  key={lang.name}
-                  className="bg-white border border-black/[0.08] rounded-xl p-3 sm:p-4 flex flex-col items-center gap-2 hover:border-black/25 hover:-translate-y-1 hover:shadow-md active:translate-y-0 active:shadow-none transition-all duration-200 cursor-default"
+          {/* ── Content Panel ── */}
+          <div className="skills-content-area">
+            <AnimatePresence mode="wait">
+              {active !== "Languages" ? (
+                /*
+                 * SKILL BARS PANEL
+                 * key={active} forces unmount/remount on tab switch
+                 * so AnimatePresence runs exit → enter correctly
+                 */
+                <motion.div
+                  key={active}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="grid sm:grid-cols-2 gap-x-12 gap-y-5 mb-14"
                 >
-                  <LangIcon lang={lang.name} />
-                  <span className="text-[11px] sm:text-[12px] font-semibold text-black text-center leading-tight">
-                    {lang.name}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-black/35 tracking-wide">
-                    {lang.tag}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+                  {skillList.map((skill) => (
+                    <SkillBar
+                      key={skill.name}
+                      name={skill.name}
+                      level={skill.level}
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                /*
+                 * LANGUAGES GRID PANEL
+                 * Same stagger pattern, spring-pop card variants
+                 */
+                <motion.div
+                  key="Languages"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="grid grid-cols-4 sm:grid-cols-7 gap-3 mb-14"
+                >
+                  {languages.map((lang) => (
+                    <motion.div
+                      key={lang.name}
+                      variants={cardVariants}
+                      whileHover={{
+                        y: -4,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.10)",
+                      }}
+                      whileTap={{ scale: 0.96 }}
+                      className="bg-white border border-black/[0.08] rounded-xl p-3 sm:p-4 flex flex-col items-center gap-2 cursor-default"
+                      style={{ willChange: "transform" }}
+                    >
+                      <LangIcon lang={lang.name} />
+                      <span className="text-[11px] sm:text-[12px] font-semibold text-black text-center leading-tight">
+                        {lang.name}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-black/35 tracking-wide">
+                        {lang.tag}
+                      </span>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Marquee badge strip */}
           <div className="overflow-hidden border-y border-black/[0.07] py-4">
